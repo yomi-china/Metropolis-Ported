@@ -1,7 +1,6 @@
 package team.dovecotmc.metropolis.block;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -27,6 +26,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -48,7 +48,7 @@ public class BlockSecurityDoor extends HorizontalDirectionalBlock {
 //    public static final EnumProperty<Direction.Axis> AXIS;
 
     public BlockSecurityDoor() {
-        super(Properties.of().mapColor(DyeColor.LIGHT_GRAY).strength(6.0f).noOcclusion());
+        super(Properties.of(Material.METAL, DyeColor.LIGHT_GRAY).strength(6.0f).noOcclusion());
     }
 
     @Override

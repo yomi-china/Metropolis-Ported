@@ -3,8 +3,13 @@ package team.dovecotmc.metropolis.client.gui.fare_adj;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import team.dovecotmc.metropolis.Metropolis;
+import team.dovecotmc.metropolis.abstractinterface.util.MALocalizationUtil;
+import team.dovecotmc.metropolis.client.network.MetroClientNetwork;
+import team.dovecotmc.metropolis.item.MetroItems;
+
+import java.util.List;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -13,10 +18,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
-import team.dovecotmc.metropolis.Metropolis;
-import team.dovecotmc.metropolis.abstractinterface.util.MALocalizationUtil;
-import team.dovecotmc.metropolis.client.network.MetroClientNetwork;
-import team.dovecotmc.metropolis.item.MetroItems;
 
 /**
  * @author Arrokoth
@@ -64,9 +65,8 @@ public class FareAdjScreenNoTicket extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        PoseStack matrices = guiGraphics.pose();
-        guiGraphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        this.fillGradient(matrices, 0, 0, this.width, this.height, -1072689136, -804253680);
 
         RenderSystem.assertOnRenderThread();
         RenderSystem.setShaderColor(1, 1, 1, 1);
@@ -74,8 +74,9 @@ public class FareAdjScreenNoTicket extends Screen {
         RenderSystem.defaultBlendFunc();
 
         matrices.pushPose();
-        guiGraphics.blit(
-                BG_TEXTURE_ID,
+        RenderSystem.setShaderTexture(0, BG_TEXTURE_ID);
+        blit(
+                matrices,
                 this.width / 2 - BG_TEXTURE_WIDTH / 2,
                 this.height / 2 - BG_TEXTURE_HEIGHT / 2,
                 0,
@@ -86,11 +87,16 @@ public class FareAdjScreenNoTicket extends Screen {
 
         // Title
         MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        guiGraphics.drawString(this.font,
-                title,
+        this.font.drawInBatch8xOutline(
+                title.getVisualOrderText(),
                 intoTexturePosX(36),
                 intoTexturePosY(12),
-                0xFFFFFF, false);
+                0xFFFFFF,
+                0x16161B,
+                matrices.last().pose(),
+                immediate,
+                15728880
+        );
         immediate.endBatch();
         matrices.popPose();
 
@@ -98,12 +104,12 @@ public class FareAdjScreenNoTicket extends Screen {
         matrices.pushPose();
         float scaleFactor = 1.5f;
         matrices.scale(scaleFactor, scaleFactor, scaleFactor);
-        guiGraphics.drawString(
-                this.font,
+        this.font.draw(
+                matrices,
                 MALocalizationUtil.translatableText("gui.metropolis.fare_adj_no_ticket.subtitle"),
-                (int)(intoTexturePosX(22) / scaleFactor),
-                (int)(intoTexturePosY(34) / scaleFactor),
-                0x3F3F3F, false
+                intoTexturePosX(22) / scaleFactor,
+                intoTexturePosY(34) / scaleFactor,
+                0x3F3F3F
         );
         matrices.popPose();
 
@@ -112,12 +118,12 @@ public class FareAdjScreenNoTicket extends Screen {
         String[] texts = MALocalizationUtil.translatableText("gui.metropolis.fare_adj_no_ticket.if_you_have_receipt").getString().split("\n");
         int i0 = 0;
         for (String text : texts) {
-            guiGraphics.drawString(
-                    this.font,
+            this.font.draw(
+                    matrices,
                     text,
                     intoTexturePosX(22),
                     intoTexturePosY(52) + (font.lineHeight + 2) * i0,
-                    0x3F3F3F, false
+                    0x3F3F3F
             );
             i0++;
         }
@@ -125,21 +131,21 @@ public class FareAdjScreenNoTicket extends Screen {
         // Insert receipt warning
         int warningSize = 14;
         Component text0 = MALocalizationUtil.translatableText("gui.metropolis.fare_adj_no_ticket.insert_receipt");
-        guiGraphics.drawString(
-                this.font,
+        this.font.draw(
+                matrices,
                 text0,
                 intoTexturePosX(22) + warningSize + 4,
 //                intoTexturePosX(0) + BG_TEXTURE_WIDTH - 12 - textRenderer.getWidth(text0),
                 intoTexturePosY(52) + (font.lineHeight + 2) * i0 + 6,
-                0x3F3F3F, false
+                0x3F3F3F
         );
-        guiGraphics.blit(
-                INFO_TEXTURE_ID,
+        RenderSystem.setShaderTexture(0, INFO_TEXTURE_ID);
+        blit(
+                matrices,
                 intoTexturePosX(22),
 //                intoTexturePosX(0) + BG_TEXTURE_WIDTH - 12 - textRenderer.getWidth(text0) - warningSize - 4,
                 intoTexturePosY(52) + (font.lineHeight + 2) * i0 + 6 - (warningSize - font.lineHeight) / 2 - 2,
-                0,
-                0,
+                warningSize, warningSize,
                 warningSize, warningSize,
                 warningSize, warningSize
         );
@@ -150,33 +156,33 @@ public class FareAdjScreenNoTicket extends Screen {
         texts = MALocalizationUtil.translatableText("gui.metropolis.fare_adj_no_ticket.if_you_dont_have_receipt").getString().split("\n");
         int i1 = 0;
         for (String text : texts) {
-            guiGraphics.drawString(
-                    this.font,
+            this.font.draw(
+                    matrices,
                     text,
                     intoTexturePosX(22),
                     intoTexturePosY(52) + 48 + (font.lineHeight + 2) * i1,
-                    0x3F3F3F, false
+                    0x3F3F3F
             );
             i1++;
         }
 
         // Insert receipt warning
         Component text1 = MALocalizationUtil.translatableText("gui.metropolis.fare_adj_no_ticket.pay_fare");
-        guiGraphics.drawString(
-                this.font,
+        this.font.draw(
+                matrices,
                 text1,
                 intoTexturePosX(22) + warningSize + 4,
 //                intoTexturePosX(0) + BG_TEXTURE_WIDTH - 12 - textRenderer.getWidth(text1),
                 intoTexturePosY(52) + 48 + (font.lineHeight + 2) * i1 + 6,
-                0x3F3F3F, false
+                0x3F3F3F
         );
-        guiGraphics.blit(
-                INFO_TEXTURE_ID,
+        RenderSystem.setShaderTexture(0, INFO_TEXTURE_ID);
+        blit(
+                matrices,
                 intoTexturePosX(22),
 //                intoTexturePosX(0) + BG_TEXTURE_WIDTH - 12 - textRenderer.getWidth(text1) - warningSize - 4,
                 intoTexturePosY(52) + 48 + (font.lineHeight + 2) * i1 + 6 - (warningSize - font.lineHeight) / 2 - 2,
-                0,
-                0,
+                warningSize, warningSize,
                 warningSize, warningSize,
                 warningSize, warningSize
         );
@@ -188,38 +194,31 @@ public class FareAdjScreenNoTicket extends Screen {
         int y0 = intoTexturePosY(152);
         boolean nextHovering = this.mouseX >= x0 && this.mouseY >= y0 && this.mouseX <= x0 + NEXT_BUTTON_WIDTH && this.mouseY <= y0 + NEXT_BUTTON_HEIGHT;
         if (nextHovering) {
-            guiGraphics.blit(
-                    NEXT_BUTTON_HOVER_TEXTURE_ID,
-                    x0,
-                    y0,
-                    0,
-                    0,
-                    NEXT_BUTTON_WIDTH, NEXT_BUTTON_HEIGHT,
-                    NEXT_BUTTON_WIDTH, NEXT_BUTTON_HEIGHT
-            );
+            RenderSystem.setShaderTexture(0, NEXT_BUTTON_HOVER_TEXTURE_ID);
         } else {
-            guiGraphics.blit(
-                    NEXT_BUTTON_TEXTURE_ID,
-                    x0,
-                    y0,
-                    0,
-                    0,
-                    NEXT_BUTTON_WIDTH, NEXT_BUTTON_HEIGHT,
-                    NEXT_BUTTON_WIDTH, NEXT_BUTTON_HEIGHT
-            );
+            RenderSystem.setShaderTexture(0, NEXT_BUTTON_TEXTURE_ID);
         }
+        blit(
+                matrices,
+                x0,
+                y0,
+                0,
+                0,
+                NEXT_BUTTON_WIDTH, NEXT_BUTTON_HEIGHT,
+                NEXT_BUTTON_WIDTH, NEXT_BUTTON_HEIGHT
+        );
 
         Component text2 = MALocalizationUtil.translatableText("gui.metropolis.fare_adj_no_ticket.pay_button");
-        guiGraphics.drawString(
-                this.font,
+        this.font.draw(
+                matrices,
                 text2,
-                (int)(x0 + NEXT_BUTTON_WIDTH / 2f - font.width(text2) / 2f),
-                (int)(y0 + NEXT_BUTTON_HEIGHT / 2f - font.lineHeight / 2f),
-                0x3F3F3F, false
+                x0 + NEXT_BUTTON_WIDTH / 2f - font.width(text2) / 2f,
+                y0 + NEXT_BUTTON_HEIGHT / 2f - font.lineHeight / 2f,
+                0x3F3F3F
         );
         matrices.popPose();
 
-        super.render(guiGraphics, mouseX, mouseY, delta);
+        super.render(matrices, mouseX, mouseY, delta);
 
         // Handle inputs
         if (minecraft != null) {

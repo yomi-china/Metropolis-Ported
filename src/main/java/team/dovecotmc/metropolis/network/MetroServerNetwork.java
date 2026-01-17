@@ -81,7 +81,7 @@ public class MetroServerNetwork {
                     }
                 }
 
-                Level world = player.serverLevel();
+                Level world = player.getLevel();
                 if (world != null) {
                     world.playSound(null, pos, SoundEvents.WOOL_PLACE, SoundSource.BLOCKS, 1f, 1f);
                     if (world.getBlockEntity(pos) instanceof BlockEntityTicketVendor blockEntity) {
@@ -113,7 +113,7 @@ public class MetroServerNetwork {
                     }
                 }
 
-                Level world = player.serverLevel();
+                Level world = player.getLevel();
                 if (world != null) {
                     world.playSound(null, pos, SoundEvents.WOOL_PLACE, SoundSource.BLOCKS, 1f, 1f);
                     if (world.getBlockEntity(pos) instanceof BlockEntityTicketVendor blockEntity) {
@@ -150,7 +150,7 @@ public class MetroServerNetwork {
                     }
                 }
                 
-                Level world = player.serverLevel();
+                Level world = player.getLevel();
                 if (world != null) {
                     world.playSound(null, pos, SoundEvents.WOOL_PLACE, SoundSource.BLOCKS, 1f, 1f);
                     if (world.getBlockEntity(pos) instanceof BlockEntityFareAdj blockEntity) {

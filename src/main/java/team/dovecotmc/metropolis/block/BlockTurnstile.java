@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -59,13 +59,9 @@ public class BlockTurnstile extends HorizontalDirectionalBlock implements Entity
     public final boolean icOnly;
 
     public BlockTurnstile(boolean icOnly) {
-        super(Properties.of()
-                .mapColor(MapColor.METAL)
-                .strength(4.0f)
-                .noOcclusion());
+        super(Properties.of(Material.METAL).strength(4.0f).noOcclusion());
         this.icOnly = icOnly;
     }
-
     @Override
     public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (world.isClientSide()) {

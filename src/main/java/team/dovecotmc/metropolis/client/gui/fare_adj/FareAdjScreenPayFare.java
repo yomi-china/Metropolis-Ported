@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -51,9 +50,8 @@ public class FareAdjScreenPayFare extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        PoseStack matrices = guiGraphics.pose();
-        guiGraphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        this.fillGradient(matrices, 0, 0, this.width, this.height, -1072689136, -804253680);
 
         RenderSystem.assertOnRenderThread();
         RenderSystem.setShaderColor(1, 1, 1, 1);
@@ -61,8 +59,9 @@ public class FareAdjScreenPayFare extends Screen {
         RenderSystem.defaultBlendFunc();
 
         matrices.pushPose();
-        guiGraphics.blit(
-                BG_TEXTURE_ID,
+        RenderSystem.setShaderTexture(0, BG_TEXTURE_ID);
+        blit(
+                matrices,
                 this.width / 2 - BG_TEXTURE_WIDTH / 2,
                 this.height / 2 - BG_TEXTURE_HEIGHT / 2,
                 0,
@@ -73,11 +72,16 @@ public class FareAdjScreenPayFare extends Screen {
 
         // Title
         MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        guiGraphics.drawString(this.font,
-                title,
+        this.font.drawInBatch8xOutline(
+                title.getVisualOrderText(),
                 intoTexturePosX(36),
                 intoTexturePosY(12),
-                0xFFFFFF, false);
+                0xFFFFFF,
+                0x16161B,
+                matrices.last().pose(),
+                immediate,
+                15728880
+        );
         immediate.endBatch();
         matrices.popPose();
 
@@ -85,16 +89,16 @@ public class FareAdjScreenPayFare extends Screen {
         matrices.pushPose();
         float scaleFactor = 1.5f;
         matrices.scale(scaleFactor, scaleFactor, scaleFactor);
-        guiGraphics.drawString(
-                this.font,
+        this.font.draw(
+                matrices,
                 MALocalizationUtil.translatableText("gui.metropolis.fare_adj_pay_fare.subtitle"),
-                (int)(intoTexturePosX(22) / scaleFactor),
-                (int)(intoTexturePosY(34) / scaleFactor),
-                0x3F3F3F, false
+                intoTexturePosX(22) / scaleFactor,
+                intoTexturePosY(34) / scaleFactor,
+                0x3F3F3F
         );
         matrices.popPose();
 
-        super.render(guiGraphics, mouseX, mouseY, delta);
+        super.render(matrices, mouseX, mouseY, delta);
 
         if (pressing) {
             pressed = !lastPressing;

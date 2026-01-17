@@ -4,8 +4,15 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import team.dovecotmc.metropolis.Metropolis;
+import team.dovecotmc.metropolis.abstractinterface.util.MALocalizationUtil;
+import team.dovecotmc.metropolis.item.ItemTicket;
+import team.dovecotmc.metropolis.item.MetroItems;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -16,14 +23,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
-import team.dovecotmc.metropolis.Metropolis;
-import team.dovecotmc.metropolis.abstractinterface.util.MALocalizationUtil;
-import team.dovecotmc.metropolis.item.ItemTicket;
-import team.dovecotmc.metropolis.item.MetroItems;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * @author Arrokoth
@@ -76,11 +75,8 @@ public class TicketVendorScreen3 extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        super.render(guiGraphics, mouseX, mouseY, delta);
-        PoseStack matrices = guiGraphics.pose();
-
-        guiGraphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        this.fillGradient(matrices, 0, 0, this.width, this.height, -1072689136, -804253680);
 //        renderTooltip();
 
         RenderSystem.assertOnRenderThread();
@@ -88,8 +84,9 @@ public class TicketVendorScreen3 extends Screen {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
-        guiGraphics.blit(
-                BG_TEXTURE_ID,
+        RenderSystem.setShaderTexture(0, BG_TEXTURE_ID);
+        blit(
+                matrices,
                 this.width / 2 - BG_TEXTURE_WIDTH / 2,
                 this.height / 2 - BG_TEXTURE_HEIGHT / 2,
                 0,
@@ -111,15 +108,15 @@ public class TicketVendorScreen3 extends Screen {
                 int x1a = intoTexturePosX(x0 + (BUTTON_UPPER_TEXTURE_WIDTH + 1) * i);
                 int y1a = intoTexturePosY(y0 + (BUTTON_UPPER_TEXTURE_HEIGHT + 2) * j);
                 boolean hovering = mouseX >= x1a && mouseY >= y1a && mouseX < x1a + BUTTON_CONTINUE_TEXTURE_WIDTH && mouseY < y1a + BUTTON_CONTINUE_TEXTURE_HEIGHT;
-
-                ResourceLocation buttonTexture = hovering ? BUTTON_UPPER_TEXTURE_HOVER_ID : BUTTON_UPPER_TEXTURE_ID;
-
-                if (!hovering) {
+                if (hovering) {
+                    RenderSystem.setShaderTexture(0, BUTTON_UPPER_TEXTURE_HOVER_ID);
+                } else {
+                    RenderSystem.setShaderTexture(0, BUTTON_UPPER_TEXTURE_ID);
                     RenderSystem.setShaderColor(96f / 256f, 96f / 256f, 96f / 256f, 1f);
                 }
 
-                guiGraphics.blit(
-                        buttonTexture,
+                blit(
+                        matrices,
                         intoTexturePosX(x0 + (BUTTON_UPPER_TEXTURE_WIDTH + 1) * i),
                         intoTexturePosY(y0 + (BUTTON_UPPER_TEXTURE_HEIGHT + 2) * j),
                         0,
@@ -132,13 +129,12 @@ public class TicketVendorScreen3 extends Screen {
                 matrices.pushPose();
                 matrices.scale(scaleFactor, scaleFactor, scaleFactor);
                 Component price = MALocalizationUtil.translatableText("misc.metropolis.cost", String.valueOf(givenPrices[i0]));
-                guiGraphics.drawString(
-                        font,
+                font.draw(
+                        matrices,
                         price,
-                        (int)(intoTexturePosX(x0 + (BUTTON_UPPER_TEXTURE_WIDTH + 1) * i + (BUTTON_UPPER_TEXTURE_WIDTH / 2f - font.width(price) * scaleFactor / 2f)) / scaleFactor),
-                        (int)(intoTexturePosY(y0 + (BUTTON_UPPER_TEXTURE_HEIGHT + 2) * j + (BUTTON_UPPER_TEXTURE_HEIGHT / 2f - font.lineHeight * scaleFactor / 2f) + 1) / scaleFactor),
-                        0xFFFFFF,
-                        false
+                        intoTexturePosX(x0 + (BUTTON_UPPER_TEXTURE_WIDTH + 1) * i + (BUTTON_UPPER_TEXTURE_WIDTH / 2f - font.width(price) * scaleFactor / 2f)) / scaleFactor,
+                        intoTexturePosY(y0 + (BUTTON_UPPER_TEXTURE_HEIGHT + 2) * j + (BUTTON_UPPER_TEXTURE_HEIGHT / 2f - font.lineHeight * scaleFactor / 2f) + 1) / scaleFactor,
+                        0xFFFFFF
                 );
                 matrices.popPose();
 
@@ -155,15 +151,14 @@ public class TicketVendorScreen3 extends Screen {
         int x1 = 165;
         int y1 = 85;
         boolean continueHovering = mouseX >= intoTexturePosX(x1) && mouseY >= intoTexturePosY(y1) && mouseX < intoTexturePosX(x1) + BUTTON_CONTINUE_TEXTURE_WIDTH && mouseY < intoTexturePosY(y1) + BUTTON_CONTINUE_TEXTURE_HEIGHT;
-
-        ResourceLocation continueTexture = continueHovering ? BUTTON_CONTINUE_TEXTURE_HOVER_ID : BUTTON_CONTINUE_TEXTURE_ID;
-
-        if (!continueHovering) {
+        if (continueHovering) {
+            RenderSystem.setShaderTexture(0, BUTTON_CONTINUE_TEXTURE_HOVER_ID);
+        } else {
+            RenderSystem.setShaderTexture(0, BUTTON_CONTINUE_TEXTURE_ID);
             RenderSystem.setShaderColor(241f / 256f, 175f / 256f, 21f / 256f, 1f);
         }
-
-        guiGraphics.blit(
-                continueTexture,
+        blit(
+                matrices,
                 intoTexturePosX(x1),
                 intoTexturePosY(y1),
                 0,
@@ -176,13 +171,12 @@ public class TicketVendorScreen3 extends Screen {
         matrices.pushPose();
         matrices.scale(scaleFactor, scaleFactor, scaleFactor);
         Component continueText = MALocalizationUtil.translatableText("gui.metropolis.ticket_vendor_3.continue");
-        guiGraphics.drawString(
-                font,
+        font.draw(
+                matrices,
                 continueText,
-                (int)(intoTexturePosX(x1 + (BUTTON_CONTINUE_TEXTURE_WIDTH / 2f - font.width(continueText) * scaleFactor / 2f)) / scaleFactor),
-                (int)(intoTexturePosY(y1 + (BUTTON_CONTINUE_TEXTURE_HEIGHT / 2f - font.lineHeight * scaleFactor / 2f) + 1) / scaleFactor),
-                0xFFFFFF,
-                false
+                intoTexturePosX(x1 + (BUTTON_CONTINUE_TEXTURE_WIDTH / 2f - font.width(continueText) * scaleFactor / 2f)) / scaleFactor,
+                intoTexturePosY(y1 + (BUTTON_CONTINUE_TEXTURE_HEIGHT / 2f - font.lineHeight * scaleFactor / 2f) + 1) / scaleFactor,
+                0xFFFFFF
         );
         matrices.popPose();
 
@@ -225,24 +219,24 @@ public class TicketVendorScreen3 extends Screen {
                                 mouseY >= intoTexturePosY(y2 + (BUTTON_NUMBER_TEXTURE_HEIGHT) * i) &&
                                 mouseX < intoTexturePosX(x2 + (BUTTON_NUMBER_TEXTURE_WIDTH) * j + BUTTON_NUMBER_TEXTURE_WIDTH) &&
                                 mouseY < intoTexturePosY(y2 + (BUTTON_NUMBER_TEXTURE_HEIGHT) * i + BUTTON_NUMBER_TEXTURE_HEIGHT);
-
-                ResourceLocation numberTexture = BUTTON_NUMBER_TEXTURE_ID;
                 if (thisHover) {
                     if (pressing) {
-                        numberTexture = BUTTON_NUMBER_TEXTURE_DOWN_ID;
+                        RenderSystem.setShaderTexture(0, BUTTON_NUMBER_TEXTURE_DOWN_ID);
                     } else {
-                        numberTexture = BUTTON_NUMBER_TEXTURE_HOVER_ID;
+                        RenderSystem.setShaderTexture(0, BUTTON_NUMBER_TEXTURE_HOVER_ID);
                     }
+                } else {
+                    RenderSystem.setShaderTexture(0, BUTTON_NUMBER_TEXTURE_ID);
                 }
 
                 if (i1 <= 9 && inputToHandle2.contains(i1)) {
-                    numberTexture = BUTTON_NUMBER_TEXTURE_DOWN_ID;
+                    RenderSystem.setShaderTexture(0, BUTTON_NUMBER_TEXTURE_DOWN_ID);
                 } else if (i1 == 11 && inputToHandle2.contains(0)) {
-                    numberTexture = BUTTON_NUMBER_TEXTURE_DOWN_ID;
+                    RenderSystem.setShaderTexture(0, BUTTON_NUMBER_TEXTURE_DOWN_ID);
                 }
 
-                guiGraphics.blit(
-                        numberTexture,
+                blit(
+                        matrices,
                         intoTexturePosX(x2 + (BUTTON_NUMBER_TEXTURE_WIDTH) * j),
                         intoTexturePosY(y2 + (BUTTON_NUMBER_TEXTURE_HEIGHT) * i),
                         0,
@@ -263,13 +257,12 @@ public class TicketVendorScreen3 extends Screen {
                     text = MALocalizationUtil.literalText("←");
                 }
 
-                guiGraphics.drawString(
-                        font,
+                this.font.draw(
+                        matrices,
                         text,
-                        (int)(intoTexturePosX((x2 + (BUTTON_NUMBER_TEXTURE_WIDTH) * j + BUTTON_NUMBER_TEXTURE_WIDTH / 2f) - this.font.width(text) / 2f) / scaleFactor),
-                        (int)(intoTexturePosY((y2 + (BUTTON_NUMBER_TEXTURE_HEIGHT) * i + BUTTON_NUMBER_TEXTURE_HEIGHT / 2f) - this.font.lineHeight / 2f + 2) / scaleFactor),
-                        0x3F3F3F,
-                        false
+                        intoTexturePosX((x2 + (BUTTON_NUMBER_TEXTURE_WIDTH) * j + BUTTON_NUMBER_TEXTURE_WIDTH / 2f) - this.font.width(text) / 2f) / scaleFactor,
+                        intoTexturePosY((y2 + (BUTTON_NUMBER_TEXTURE_HEIGHT) * i + BUTTON_NUMBER_TEXTURE_HEIGHT / 2f) - this.font.lineHeight / 2f + 2) / scaleFactor,
+                        0x3F3F3F
                 );
                 matrices.popPose();
 
@@ -328,30 +321,35 @@ public class TicketVendorScreen3 extends Screen {
         // Render text
         // Title
         MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        guiGraphics.drawString(
-                font,
-                MALocalizationUtil.translatableText("gui.metropolis.ticket_vendor_3.title"),
+        this.font.drawInBatch8xOutline(
+                MALocalizationUtil.translatableText("gui.metropolis.ticket_vendor_3.title").getVisualOrderText(),
                 intoTexturePosX(36),
                 intoTexturePosY(12),
                 0xFFFFFF,
-                true
+                0x16161B,
+                matrices.last().pose(),
+                immediate,
+                15728880
         );
         immediate.endBatch();
 
         // Charge Value
         matrices.pushPose();
         matrices.scale(scaleFactor, scaleFactor, scaleFactor);
-        guiGraphics.drawString(
-                font,
+        this.font.drawShadow(
+                matrices,
                 MALocalizationUtil.translatableText("misc.metropolis.cost", this.value),
-                (int)(intoTexturePosX(38) / scaleFactor),
-                (int)(intoTexturePosY(90) / scaleFactor),
-                0xFFFFFF,
-                true
+                intoTexturePosX(38) / scaleFactor,
+                intoTexturePosY(90) / scaleFactor,
+                0xFFFFFF
         );
         matrices.popPose();
 
+        matrices.popPose();
+
         RenderSystem.disableBlend();
+
+        super.render(matrices, mouseX, mouseY, delta);
 
         if (pressing) {
             pressed = !lastPressing;

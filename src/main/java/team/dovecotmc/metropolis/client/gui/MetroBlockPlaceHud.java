@@ -9,7 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -30,7 +30,7 @@ import team.dovecotmc.metropolis.util.MtrStationUtil;
  */
 @SuppressWarnings("unused")
 @Environment(EnvType.CLIENT)
-public class MetroBlockPlaceHud {
+public class MetroBlockPlaceHud extends GuiComponent {
     public boolean shouldRender = false;
     public PoseStack matricesWorld;
     public VertexConsumer vertexConsumerWorld;
@@ -41,7 +41,7 @@ public class MetroBlockPlaceHud {
         vertexConsumerWorld = null;
     }
 
-    public void render(GuiGraphics guiGraphics, float tickDelta) {
+    public void render(PoseStack matrices, float tickDelta) {
         if (!MetropolisClient.config.enableStationInfoOverlay) {
             return;
         }
@@ -63,14 +63,13 @@ public class MetroBlockPlaceHud {
             return;
         }
 
-        if (hitResult != null && textRenderer != null && hitResult.getType() == HitResult.Type.BLOCK) {
+        if (hitResult != null && textRenderer != null && hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
             BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
             int width = client.getWindow().getGuiScaledWidth();
             int height = client.getWindow().getGuiScaledHeight();
             int centerX = width / 2;
             int centerY = height / 2;
 
-            PoseStack matrices = guiGraphics.pose();
             matrices.pushPose();
 
             RenderSystem.assertOnRenderThread();
@@ -91,13 +90,12 @@ public class MetroBlockPlaceHud {
                 int y0 = centerY - 8 - textRenderer.lineHeight;
                 Component pointedStation = MALocalizationUtil.translatableText("hud.title.pointed_station");
                 int pointedStationWidth = textRenderer.width(pointedStation);
-                guiGraphics.drawString(
-                        textRenderer,
+                textRenderer.drawShadow(
+                        matrices,
                         pointedStation,
-                        (int) (centerX - pointedStationWidth / 2f),
+                        centerX - pointedStationWidth / 2f,
                         y0,
-                        0xFFFFFF,
-                        true
+                        0xFFFFFF
                 );
 
                 y0 = centerY + 8;
@@ -105,29 +103,26 @@ public class MetroBlockPlaceHud {
                 String[] stationNames = station.name.split("\\|");
                 Component stationFirstName = MALocalizationUtil.literalText(stationNames[0]);
                 int stationFirstNameWidth = textRenderer.width(stationFirstName);
-                guiGraphics.drawString(
-                        textRenderer,
+                textRenderer.drawShadow(
+                        matrices,
                         stationFirstName,
-                        (int) (centerX - stationFirstNameWidth / 2f),
+                        centerX - stationFirstNameWidth / 2f,
                         y0,
-                        0xFFFFFF,
-                        true
+                        0xFFFFFF
                 );
 
                 if (stationNames.length > 1) {
                     Component stationSecondName = MALocalizationUtil.literalText(stationNames[1]);
                     int stationSecondNameWidth = textRenderer.width(stationSecondName);
                     y0 += textRenderer.lineHeight + 2;
-                    guiGraphics.drawString(
-                            textRenderer,
+                    textRenderer.drawShadow(
+                            matrices,
                             stationSecondName,
-                            (int) (centerX - stationSecondNameWidth / 2f),
+                            centerX - stationSecondNameWidth / 2f,
                             y0,
-                            0x545454,
-                            true
+                            0x545454
                     );
                 }
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             }
 
             matrices.popPose();

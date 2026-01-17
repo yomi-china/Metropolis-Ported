@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -45,10 +44,11 @@ public class MetroModMenuConfigScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        this.renderBackground(graphics);
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+//        this.renderBackground(matrices);
+        this.renderDirtBackground(matrices);
 
-        super.render(graphics, mouseX, mouseY, delta);
+        super.render(matrices, mouseX, mouseY, delta);
 
         // Mod container
         Optional<ModContainer> modContainer = FabricLoader.getInstance().getModContainer(Metropolis.MOD_ID);
@@ -60,27 +60,24 @@ public class MetroModMenuConfigScreen extends Screen {
         ModContainer mod = modContainer.get();
         int button_offset = (SWITCH_TEXTURE_HEIGHT - font.lineHeight) / 2;
 
-        PoseStack matrices = graphics.pose();
         matrices.pushPose();
         matrices.scale(2f, 2f, 2f);
         Component name = MALocalizationUtil.literalText(mod.getMetadata().getName());
-        graphics.drawString(
-                font,
+        font.drawShadow(
+                matrices,
                 name,
-                (int) ((width / 2f - font.width(name) * 2f / 2f) / 2f),
-                16 / 2,
-                0xFFFFFF,
-                true
+                (width / 2f - font.width(name) * 2f / 2f) / 2f, 16 / 2f,
+                0xFFFFFF
         );
         matrices.popPose();
 
         // Enable glowing texture
         matrices.pushPose();
         Component text = MALocalizationUtil.translatableText("config.metropolis.client.enable_glowing_texture");
-        graphics.drawString(
-                font,
+        font.draw(
+                matrices,
                 text,
-                (int) (width / 2f - 32 - font.width(text)),
+                width / 2f - 32 - font.width(text),
                 64,
                 0xFFFFFF
         );
@@ -90,12 +87,10 @@ public class MetroModMenuConfigScreen extends Screen {
         int x0 = width / 2 + 32;
         int y0 = 64 - button_offset;
         boolean isGlowingTextureHovered = mouseX >= x0 && mouseY >= y0 && mouseX <= x0 + SWITCH_TEXTURE_WIDTH && mouseY <= y0 + SWITCH_TEXTURE_HEIGHT;
-
-        ResourceLocation switchTexture;
         if (MetropolisClient.config.enableGlowingTexture) {
-            switchTexture = isGlowingTextureHovered ? SWITCH_ON_HOVER_TEXTURE_ID : SWITCH_ON_TEXTURE_ID;
+            RenderSystem.setShaderTexture(0, isGlowingTextureHovered ? SWITCH_ON_HOVER_TEXTURE_ID : SWITCH_ON_TEXTURE_ID);
         } else {
-            switchTexture = isGlowingTextureHovered ? SWITCH_OFF_HOVER_TEXTURE_ID : SWITCH_OFF_TEXTURE_ID;
+            RenderSystem.setShaderTexture(0, isGlowingTextureHovered ? SWITCH_OFF_HOVER_TEXTURE_ID : SWITCH_OFF_TEXTURE_ID);
         }
 
         if (isGlowingTextureHovered && pressed) {
@@ -104,8 +99,8 @@ public class MetroModMenuConfigScreen extends Screen {
             playDownSound();
         }
 
-        graphics.blit(
-                switchTexture,
+        blit(
+                matrices,
                 x0,
                 y0,
                 0,
@@ -118,10 +113,10 @@ public class MetroModMenuConfigScreen extends Screen {
 
         // Enable station info overlay
         text = MALocalizationUtil.translatableText("config.metropolis.client.enable_station_info_overlay");
-        graphics.drawString(
-                font,
+        font.draw(
+                matrices,
                 text,
-                (int) (width / 2f - 32 - font.width(text)),
+                width / 2f - 32 - font.width(text),
                 64 + (16 + font.lineHeight),
                 0xFFFFFF
         );
@@ -130,11 +125,10 @@ public class MetroModMenuConfigScreen extends Screen {
 
         int y1 = 64 + (16 + font.lineHeight) - button_offset;
         boolean isEnableStationInfoDisplayHovered = mouseX >= x0 && mouseY >= y1 && mouseX <= x0 + SWITCH_TEXTURE_WIDTH && mouseY <= y1 + SWITCH_TEXTURE_HEIGHT;
-
         if (MetropolisClient.config.enableStationInfoOverlay) {
-            switchTexture = isEnableStationInfoDisplayHovered ? SWITCH_ON_HOVER_TEXTURE_ID : SWITCH_ON_TEXTURE_ID;
+            RenderSystem.setShaderTexture(0, isEnableStationInfoDisplayHovered ? SWITCH_ON_HOVER_TEXTURE_ID : SWITCH_ON_TEXTURE_ID);
         } else {
-            switchTexture = isEnableStationInfoDisplayHovered ? SWITCH_OFF_HOVER_TEXTURE_ID : SWITCH_OFF_TEXTURE_ID;
+            RenderSystem.setShaderTexture(0, isEnableStationInfoDisplayHovered ? SWITCH_OFF_HOVER_TEXTURE_ID : SWITCH_OFF_TEXTURE_ID);
         }
 
         if (isEnableStationInfoDisplayHovered && pressed) {
@@ -143,8 +137,8 @@ public class MetroModMenuConfigScreen extends Screen {
             playDownSound();
         }
 
-        graphics.blit(
-                switchTexture,
+        blit(
+                matrices,
                 x0,
                 y1,
                 0,

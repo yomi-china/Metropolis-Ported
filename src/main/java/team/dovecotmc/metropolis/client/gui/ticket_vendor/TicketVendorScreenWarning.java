@@ -1,7 +1,7 @@
 package team.dovecotmc.metropolis.client.gui.ticket_vendor;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.GuiGraphics;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -33,16 +33,17 @@ public class TicketVendorScreenWarning extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        guiGraphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        this.fillGradient(matrices, 0, 0, this.width, this.height, -1072689136, -804253680);
 
         RenderSystem.assertOnRenderThread();
         RenderSystem.setShaderColor(1, 1, 1, 1);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
-        guiGraphics.blit(
-                BG_TEXTURE_ID,
+        RenderSystem.setShaderTexture(0, BG_TEXTURE_ID);
+        blit(
+                matrices,
                 this.width / 2 - BG_TEXTURE_WIDTH / 2,
                 this.height / 2 - BG_TEXTURE_HEIGHT / 2,
                 0,
@@ -53,10 +54,11 @@ public class TicketVendorScreenWarning extends Screen {
 
         float scaleFactor = 1.5f;
 
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().scale(scaleFactor, scaleFactor, scaleFactor);
-        guiGraphics.blit(
-                WARNING_TEXTURE_ID,
+        matrices.pushPose();
+        matrices.scale(scaleFactor, scaleFactor, scaleFactor);
+        RenderSystem.setShaderTexture(0, WARNING_TEXTURE_ID);
+        blit(
+                matrices,
                 (int) ((this.width / 2 - WARNING_TEXTURE_WIDTH / 2f * scaleFactor) / scaleFactor),
                 (int) ((this.height / 2 - WARNING_TEXTURE_HEIGHT / 2f * scaleFactor - 16) / scaleFactor),
                 0,
@@ -64,39 +66,39 @@ public class TicketVendorScreenWarning extends Screen {
                 WARNING_TEXTURE_WIDTH, WARNING_TEXTURE_HEIGHT,
                 WARNING_TEXTURE_WIDTH, WARNING_TEXTURE_HEIGHT
         );
-        guiGraphics.pose().popPose();
+        matrices.popPose();
 
         scaleFactor = 14f / font.lineHeight;
 
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().scale(scaleFactor, scaleFactor, scaleFactor);
+        matrices.pushPose();
+        matrices.scale(scaleFactor, scaleFactor, scaleFactor);
         Component warningTitle = MALocalizationUtil.translatableText("gui.metropolis.ticket_vendor_warning.title_warning");
-        guiGraphics.drawString(
-                font,
+        font.drawShadow(
+                matrices,
                 warningTitle,
-                (int) ((this.width / 2f - font.width(warningTitle) * scaleFactor / 2f) / scaleFactor),
-                (int) ((this.height / 2f - font.lineHeight * scaleFactor / 2f + 28) / scaleFactor),
-                0xFFFFFF,
-                true
+                (this.width / 2f - font.width(warningTitle) * scaleFactor / 2f) / scaleFactor,
+                (this.height / 2f - font.lineHeight * scaleFactor / 2f + 28) / scaleFactor,
+                0xFFFFFF
         );
-        guiGraphics.pose().popPose();
+        matrices.popPose();
 
         scaleFactor = 1f;
 
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().scale(scaleFactor, scaleFactor, scaleFactor);
+        matrices.pushPose();
+        matrices.scale(scaleFactor, scaleFactor, scaleFactor);
         Component warningNoCard = MALocalizationUtil.translatableText("gui.metropolis.ticket_vendor_warning.warning_no_card");
-        guiGraphics.drawString(
-                font,
+        font.drawShadow(
+                matrices,
                 warningNoCard,
-                (int) ((this.width / 2f - font.width(warningNoCard) * scaleFactor / 2f) / scaleFactor),
-                (int) ((this.height / 2f - font.lineHeight * scaleFactor / 2f + 44) / scaleFactor),
-                0xFFFFFF,
-                true
+                (this.width / 2f - font.width(warningNoCard) * scaleFactor / 2f) / scaleFactor,
+                (this.height / 2f - font.lineHeight * scaleFactor / 2f + 44) / scaleFactor,
+                0xFFFFFF
         );
-        guiGraphics.pose().popPose();
+        matrices.popPose();
 
-        super.render(guiGraphics, mouseX, mouseY, delta);
+        matrices.popPose();
+
+        super.render(matrices, mouseX, mouseY, delta);
     }
 
     @Override
